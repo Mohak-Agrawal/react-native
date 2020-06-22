@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ProductsStackNavigator from './ProductsStackNavigator'
@@ -13,7 +13,7 @@ const Tab = createMaterialBottomTabNavigator();
 
 export default function TabNavigator() {
   return (
-    <NavigationContainer>
+    
       <Tab.Navigator
         initialRouteName="Home"
         activeColor="#16A085"
@@ -48,6 +48,6 @@ export default function TabNavigator() {
           )
         }} />
       </Tab.Navigator>
-    </NavigationContainer>
+    
   );
 }

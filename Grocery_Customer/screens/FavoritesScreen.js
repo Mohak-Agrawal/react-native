@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import { Text, View,FlatList,StyleSheet,Image, Alert,ToastAndroid } from 'react-native'
 import { TouchableNativeFeedback, TouchableOpacity } from 'react-native-gesture-handler';
-import { Appbar } from 'react-native-paper';
+import { Appbar,ActivityIndicator } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
-//iss screen mein alg error h
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import auth from '@react-native-firebase/auth';
+const uid = auth().currentUser.uid;
 export default class FavoritesScreen extends Component {
 
     constructor(props) {
@@ -16,7 +18,7 @@ export default class FavoritesScreen extends Component {
         }
         componentDidMount(){
           this.subscriber=
-          firestore().collection("favoriteItems").onSnapshot(res =>{
+          firestore().collection('Users').doc(uid).collection('Wishlist').onSnapshot(res =>{
             console.log('res from',res)
             let docs = res.size ? res.docs : null
              this.setState({favoriteItems:docs,loaded:true})
@@ -25,13 +27,26 @@ export default class FavoritesScreen extends Component {
         }
 
               onUnlike = (id) => {
-                firestore().collection('favoriteItems').doc(id).update({addedToWishlist:false})
+                firestore().collection('favoriteItems').doc(id).delete()
                 ToastAndroid.show("Removed from wishlist", ToastAndroid.SHORT);
+              }
+
+              moveToCart = (title,price,image,category,id) => {
+                firestore().collection('userCartItems').add({
+                  title:title,
+                  price:price,
+                  category:category,
+                  quantity:1,
+                  image: image,
+                  addedToCart:true
+              })
+              firestore().collection('favoriteItems').doc(id).delete()
+              ToastAndroid.show("Moved to cart", ToastAndroid.SHORT);
               }
 
     render() {
       let { favoriteItems,loaded}= this.state
-      // console.log(this.state) kch bhi naa likha..?bss loding 
+      
         return (
             <View style={styles.container}>
                 <Appbar.Header style={{backgroundColor:'white'}}>   
@@ -40,7 +55,7 @@ export default class FavoritesScreen extends Component {
                 </Appbar.Header>
 
                 {loaded ? 
-                favoriteItems ?
+                this.state.favoriteItems!=null ?
                   <FlatList style={{flex:1}} 
                 data={this.state.favoriteItems} 
                 numColumns={2}
@@ -49,21 +64,26 @@ export default class FavoritesScreen extends Component {
                 showsVerticalScrollIndicator={false} 
                 />
                 :
-                <Text style={{textAlign:'center'}}> NO Items Found</Text>
+                <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                  <Icon name="favorite" size={60} color="red"  />
+                  <Text style={{fontSize:18}}>You haven't added any products yet</Text>
+                </View>
                 :
-                <Text style={{textAlign:'center'}}> Loading The Items List...</Text>
+                <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                  <ActivityIndicator animating={true} color={'#16A085'} style={{alignSelf:'center'}}/>
+                </View>
                 }
             </View>
         )
     }
     renderItem(item,id){
-        if(item.addedToWishlist===true&&item.inStock===true)
+        if(item.addedToWishlist===true)
         {
           return(
             <View style={styles.card}>
               <View style={{padding:15}} >
-                {item.addedToWishlist? <Icon name="favorite" size={28} color="red" style={{alignSelf:'flex-end'}} /> 
-                : <Icon name="favorite-border" size={28} color="#555" style={{alignSelf:'flex-end'}} onPress={()=>{this.onUnlike(id)}}/>}
+                {item.addedToWishlist? <Icon name="favorite" size={28} color="red" style={{alignSelf:'flex-end'}} onPress={()=>{this.onUnlike(id)}}/> 
+                : <Icon name="favorite-border" size={28} color="#555" style={{alignSelf:'flex-end'}} />}
                 <Image source={{uri:item.image}} style={{width:'70%',height:80,alignSelf:'center',marginBottom:20,borderRadius:5}} />
                 <Text style={{fontSize:20,fontWeight:'bold'}}>{item.title}</Text>
                 <Text>₹{item.price}</Text>
@@ -72,9 +92,9 @@ export default class FavoritesScreen extends Component {
                 <View style={{backgroundColor:'white',padding:10,justifyContent:'space-evenly',borderWidth:1,borderColor:'#f2f2f2',alignItems:'center'}}>
                 <Text style={{fontSize:14,color:'#16A085'}}>GO TO CART</Text>          
                 </View>:
-                <TouchableNativeFeedback onPress={()=>this.addToCart(item.title,item.price,item.image,item.category)}>
+                <TouchableNativeFeedback onPress={()=>this.moveToCart(item.title,item.price,item.image,item.category,id)}>
                   <View style={{backgroundColor:'#16A085',padding:10,justifyContent:'center',alignItems:'center'}}>
-                    <Text style={{fontSize:14,color:'white'}}>ADD TO CART</Text> 
+                    <Text style={{fontSize:14,color:'white'}}>MOVE TO CART</Text> 
                   </View>
                 </TouchableNativeFeedback>}
         

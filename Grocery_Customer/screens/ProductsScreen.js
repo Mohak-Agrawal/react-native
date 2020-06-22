@@ -3,6 +3,7 @@ import { Text, View,FlatList,StyleSheet,Image, Alert,ToastAndroid } from 'react-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import { Appbar,ActivityIndicator } from 'react-native-paper';
+import auth from '@react-native-firebase/auth';
 import { TouchableNativeFeedback, TouchableOpacity } from 'react-native-gesture-handler';
 export default class ProductsScreen extends Component {
    
@@ -19,7 +20,7 @@ export default class ProductsScreen extends Component {
 
     componentDidMount = () => {
       this.subscriber=
-        firestore().collection("groceryItems").onSnapshot(res =>{
+        firestore().collection('Sellers').doc('Seller_1').collection('Products').onSnapshot(res =>{
           let docs = res.size ? res.docs : []
           this.setState({groceryItems:docs})
         })
@@ -33,24 +34,26 @@ export default class ProductsScreen extends Component {
     
   
     onLike = (id,title,price,image,category,) => {
-      firestore().collection('favoriteItems').add({
+      const uid = auth().currentUser.uid
+      firestore().collection('Users').doc(uid).collection('Wishlist').add({
         title:title,
         price:price,
         category:category,
         image: image,
         addedToWishlist:true
     })
-     firestore().collection('groceryItems').doc(id).update({addedToWishlist:true})
+     firestore().collection('Sellers').doc('Seller_1').collection('Products').doc(id).update({addedToWishlist:true})
       ToastAndroid.show("Added to wishlist", ToastAndroid.SHORT);
     }
 
     onUnlike = (id) => {
-      firestore().collection('groceryItems').doc(id).update({addedToWishlist:false})
+      firestore().collection('Sellers').doc('Seller_1').collection('Products').doc(id).update({addedToWishlist:false})
       ToastAndroid.show("Removed from wishlist", ToastAndroid.SHORT);
     }
     
     addToCart = (title,price,image,category,id) => {
-      firestore().collection('userCartItems').add({
+      const uid = auth().currentUser.uid
+      firestore().collection('Users').doc(uid).collection('Cart').add({
         title:title,
         price:price,
         category:category,
@@ -58,7 +61,7 @@ export default class ProductsScreen extends Component {
         quantity:1,
         addedToCart: true
     })
-      firestore().collection('groceryItems').doc(id).update({addedToCart:true})
+      firestore().collection('Sellers').doc('Seller_1').collection('Products').doc(id).update({addedToCart:true})
       ToastAndroid.show("Added to Cart", ToastAndroid.SHORT);
     }
   

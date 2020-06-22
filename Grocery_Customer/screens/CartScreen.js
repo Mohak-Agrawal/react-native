@@ -4,26 +4,24 @@ import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { TouchableNativeFeedback, TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import { DataTable } from 'react-native-paper';
-
+import auth from '@react-native-firebase/auth';
+const uid = auth().currentUser.uid;
 var total=0
 let quantityCount=1
-let count=0  //aur ye initial count hai but ye change nahi ho payega .. isko state me dalo tabhi aleter kar paoge...ok
+let count=0  
 
 export default class CartScreen extends Component {
     constructor(props){
         super(props);
-    //    isko constructor me ku dalte...?
-
         this.state={
             cartEmpty: true,
             total:null,
         }
     }
 
-
     componentDidMount() {
         this.subscriber=
-        firestore().collection("userCartItems").onSnapshot(res => {
+        firestore().collection('Users').doc(uid).collection('Cart').onSnapshot(res => {
             console.log(res)
             count=res.size
            let docs = res.size ? 

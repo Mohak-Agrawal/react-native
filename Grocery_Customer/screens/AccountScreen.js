@@ -2,8 +2,25 @@ import React, { Component } from 'react'
 import { Text, View,StyleSheet } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { TouchableNativeFeedback, ScrollView } from 'react-native-gesture-handler';
+import auth from '@react-native-firebase/auth';
 
 export default class AccountScreen extends Component {
+
+    // componentDidMount(){
+    //     auth().currentUser.updateProfile({
+    //         displayName:'mohak'
+    //     })
+    //     const user = auth().currentUser
+    //     console.log(user)
+    // }
+
+    logout = () => {
+        auth()
+        .signOut()
+        .then(() => console.log('User signed out!'));
+        this.props.navigation.navigate("Login");
+    }
+
     render() {
         return (
             <ScrollView>
@@ -56,6 +73,16 @@ export default class AccountScreen extends Component {
                    <View style={{flexDirection:'row',alignItems:'center'}}>
                        <Icon name="settings" size={28} color={'#16A085'}/>
                        <Text style={{fontSize:14,marginLeft:10}}>App Settings</Text>
+                   </View>
+                   <Icon name="keyboard-arrow-right" size={28} color={'#16A085'}/>
+                </TouchableNativeFeedback>
+               </View>
+
+               <View style={styles.viewOutline}>
+               <TouchableNativeFeedback style={styles.touchable} onPress={()=> this.logout()}>
+                   <View style={{flexDirection:'row',alignItems:'center'}}>
+                       <Icon name="exit-to-app" size={28} color={'#16A085'}/>
+                       <Text style={{fontSize:14,marginLeft:10}}>Logout</Text>
                    </View>
                    <Icon name="keyboard-arrow-right" size={28} color={'#16A085'}/>
                 </TouchableNativeFeedback>
